@@ -1,7 +1,7 @@
 {
   "name": "dependency-version-checker",
-  "version": "0.2.0",
-  "description": "",
+  "version": "0.3.0",
+  "description": "This library allows you to run a check for newer versions against your development and production dependencies, both npm and `git://`/`git+ssh://`.",
   "main": "index.js",
   "bin": {
     "check-dep-versions": "cli.js"
@@ -20,5 +20,25 @@
     "semver": "^6.0.0",
     "spawn-shell": "^2.1.0",
     "yargs": "^13.2.4"
-  }
+  },
+  "directories": {
+    "lib": "lib",
+    "test": "tests"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tmakuch/dependency-version-checker.git"
+  },
+  "keywords": [
+    "git",
+    "npm",
+    "check",
+    "versions",
+    "updates"
+  ],
+  "bugs": {
+    "url": "https://github.com/tmakuch/dependency-version-checker/issues"
+  },
+  "homepage": "https://github.com/tmakuch/dependency-version-checker#readme"
 }

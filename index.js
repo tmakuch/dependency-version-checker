@@ -1,4 +1,5 @@
 const getGitTags = require("./lib/getGitTags");
+const getNpmTags = require("./lib/getNpmTags");
 const p = require("bluebird");
 const path = require("path");
 const readFilePromise = p.promisify(require("fs").readFile);
@@ -34,15 +35,7 @@ module.exports = function findPackagesToUpdate(pckPath, rule, options) {
         )
         .map(dependency =>
             p
-                .resolve(dependency)
-                .then(getGitUrl)
-                .tap(
-                    gitUrl =>
-                        options.verbose &&
-                        console.debug(`"${dependency.name}" is on ${gitUrl}.`)
-                )
-                .then(gitUrl => getGitTags(gitUrl, options.verbose))
-                .then(parseLsRemoteResponse)
+                .try(() => getListOfTags(dependency, options))
                 .then(result => Object.assign(dependency, { tags: result }))
                 .then(dep => findNextVersions(dep, options.verbose))
                 .catch(err => {
@@ -62,41 +55,39 @@ function getDependenciesChecker(rule) {
     };
 }
 
-function getGitUrl(dependency) {
-    if (dependency.version.includes("#semver:")) {
-        return dependency.version.replace(/#semver:[^\s]+$/, "");
+function getListOfTags(dependency, options) {
+    const doesItLookLikeGitLink = dependency.version.includes("#semver:");
+
+    if (doesItLookLikeGitLink) {
+        return p.try(() => getGitTags(dependency, options.verbose));
     }
 
-    throw new Error(
-        `This (${dependency.version}) does not look like link with #semver tag`
-    );
-}
-
-function parseLsRemoteResponse(response) {
-    return response
-        .split("\n")
-        .map(
-            line =>
-                line.includes("refs/tags/") &&
-                /refs\/tags\/v?(.+)/.exec(line)[1]
-        )
-        .filter(ver => ver);
+    return p.try(() => getNpmTags(dependency.name, options.verbose));
 }
 
 function findNextVersions({ name, type, version, tags }, isVerbose) {
-    if (!version.includes("#semver:")) {
-        return null; //how the hell we would get here?
+    let currentVersion;
+
+    if (version.includes("#semver:")) {
+        currentVersion = semver.coerce(/#semver:(.+)/.exec(version)[1]);
+    } else {
+        currentVersion = semver.coerce(version);
     }
 
-    const currentVersion = semver.coerce(/#semver:(.+)/.exec(version)[1]);
     if (isVerbose) {
         console.debug(
             `Current version for "${name}" is ${JSON.stringify(currentVersion)}`
         );
     }
 
-    const latestMinor = semver.maxSatisfying(tags, `>${currentVersion.version} <${currentVersion.major+1}`);
-    const latestMajor = semver.maxSatisfying(tags, `>${currentVersion.version}`);
+    const latestMinor = semver.maxSatisfying(
+        tags,
+        `>${currentVersion.version} <${currentVersion.major + 1}`
+    );
+    const latestMajor = semver.maxSatisfying(
+        tags,
+        `>${currentVersion.version}`
+    );
 
     return {
         name,

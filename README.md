@@ -1,16 +1,16 @@
 # Dependency Version Checker
 
-This library allows you to run a check for newer versions against all your `git+ssh://` and `git://` dev and production dependencies.
-
-It does now work for npm installed dependencies (yet?), if you want to check those I would suggest you to use libraries like `ncu`.
+This library allows you to run a check for newer versions against your development and production dependencies, both npm and `git://`/`git+ssh://`.
 
 ## Motivation
-Internal libraries or other dependencies should be as easy to verify as those published to npm.
+Internal libraries or other dependencies should be as easy to verify as those published to npm. And you should have one tool for that.
 
 ## Prerequisites
-If you're able to clone the repo, you're able to check the tags.
+For git, if you're able to clone the repo, you're able to check the tags.
 
-Configure your git and ssh in you have private repos.  
+For npm, there's no support for custom, manual repositories. If you're using custom repository, make it work without any additional parameters. 
+
+Configure your npm, git and ssh if you have private repos.  
 
 ## Installation
 `npm install -g git://github.com/tmakuch/dependency-version-checker.git`
