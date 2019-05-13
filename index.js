@@ -95,11 +95,14 @@ function findNextVersions({ name, type, version, tags }, isVerbose) {
         );
     }
 
+    const latestMinor = semver.maxSatisfying(tags, `>${currentVersion.version} <${currentVersion.major+1}`);
+    const latestMajor = semver.maxSatisfying(tags, `>${currentVersion.version}`);
+
     return {
         name,
         type,
         currentVersion: currentVersion.version,
-        nextVersion: semver.minSatisfying(tags, ">" + currentVersion.version),
-        latestVersion: semver.maxSatisfying(tags, ">" + currentVersion.version)
+        latestMinor,
+        latestMajor: latestMajor !== latestMinor ? latestMajor : null
     };
 }

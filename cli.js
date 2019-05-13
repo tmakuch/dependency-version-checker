@@ -37,8 +37,8 @@ return logic(packagePath, yargs.rule, yargs)
                 name: "Dependency",
                 type: "Type",
                 currentVersion: "Current Version",
-                nextVersion: "Next version",
-                latestVersion: "Latest version"
+                latestMinor: "Latest Minor",
+                latestMajor: "Latest Major"
             },
             data: successes
         });

@@ -1,6 +1,6 @@
 {
   "name": "dependency-version-checker",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "",
   "main": "index.js",
   "bin": {
@@ -8,7 +8,9 @@
   },
   "scripts": {
     "test-case-1": "cd tests/testProj1 && node ../../cli.js && cd ../..",
-    "test": "npm run test-case-1"
+    "test-case-2": "cd tests/testProj1 && node ../../cli.js lod && cd ../..",
+    "test-case-3": "cd tests/testProj1 && node ../../cli.js --show-errors && cd ../..",
+    "test": "npm run test-case-1 && npm run test-case-2 && npm run test-case-3"
   },
   "author": "Tadeusz Makuch",
   "license": "MIT",
