@@ -1,6 +1,6 @@
 {
   "name": "dependency-version-checker",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "",
   "main": "index.js",
   "bin": {
@@ -10,12 +10,13 @@
     "test-case-1": "cd tests/testProj1 && node ../../cli.js && cd ../..",
     "test": "npm run test-case-1"
   },
-  "author": "",
+  "author": "Tadeusz Makuch",
   "license": "MIT",
   "dependencies": {
     "bluebird": "^3.5.4",
     "concat-stream": "^2.0.0",
     "semver": "^6.0.0",
-    "spawn-shell": "^2.1.0"
+    "spawn-shell": "^2.1.0",
+    "yargs": "^13.2.4"
   }
 }

@@ -4,7 +4,11 @@ const path = require("path");
 const readFilePromise = p.promisify(require("fs").readFile);
 const semver = require("semver");
 
-module.exports = function findPackagesToUpdate(pckPath, rule) {
+module.exports = function findPackagesToUpdate(pckPath, rule, options) {
+    if (options.verbose) {
+        console.debug(`Found package file: ${pckPath}. Rule set to ${rule}.`);
+    }
+
     const isOurDependency = getDependenciesChecker(rule);
 
     return readFilePromise(path.resolve(pckPath))
@@ -19,19 +23,23 @@ module.exports = function findPackagesToUpdate(pckPath, rule) {
             ]
                 .filter(isOurDependency)
         )
+        .tap(dependencies => options.verbose && console.debug(`Dependencies found: ${dependencies.map(({name, type}) => `${name} (${type})`).join(", ")}`))
         .map(dependency =>
             p
                 .resolve(dependency)
                 .then(getGitUrl)
-                .then(getGitTags)
+                .tap(gitUrl => options.verbose && console.debug(`"${dependency.name}" is on ${gitUrl}.`))
+                .then(gitUrl => getGitTags(gitUrl, options.verbose))
                 .then(parseLsRemoteResponse)
                 .then(result => Object.assign(dependency, {tags: result}))
-                .then(findNextVersions)
-                .catch(err => ({
-                    name: dependency.name,
-                    type: dependency.type,
-                    error: err.message
-                }))
+                .then(dep => findNextVersions(dep, options.verbose))
+                .catch(err => {
+                    return {
+                        name: dependency.name,
+                        type: dependency.type,
+                        error: err.message
+                    };
+                })
         );
 };
 
@@ -47,7 +55,7 @@ function getGitUrl(dependency) {
         return dependency.version.replace(/#semver:[^\s]+$/, "");
     }
 
-    throw new Error("This does not look like link with #semver tag");
+    throw new Error(`This (${dependency.version}) does not look like link with #semver tag`);
 }
 
 function parseLsRemoteResponse(response) {
@@ -57,12 +65,15 @@ function parseLsRemoteResponse(response) {
         .filter(ver => ver);
 }
 
-function findNextVersions({name, type, version, tags}) {
+function findNextVersions({name, type, version, tags}, isVerbose) {
     if (!version.includes("#semver:")) {
-        return null;
+        return null; //how the hell we would get here?
     }
 
     const currentVersion = semver.coerce(/#semver:(.+)/.exec(version)[1]);
+    if (isVerbose) {
+        console.debug(`Current version for "${name}" is ${JSON.stringify(currentVersion)}`);
+    }
 
     return {
         name,
