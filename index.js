@@ -15,23 +15,35 @@ module.exports = function findPackagesToUpdate(pckPath, rule, options) {
         .then(JSON.parse)
         .then(pck =>
             [
-                ...Object.entries(pck.dependencies || [])
-                    .map(([name, version]) => ({name, type: "Prod", version})),
-                ...Object.entries(pck.devDependencies || [])
-                    .map(([name, version]) => ({name, type: "Dev", version}))
-
-            ]
-                .filter(isOurDependency)
+                ...Object.entries(pck.dependencies || []).map(
+                    ([name, version]) => ({ name, type: "Prod", version })
+                ),
+                ...Object.entries(pck.devDependencies || []).map(
+                    ([name, version]) => ({ name, type: "Dev", version })
+                )
+            ].filter(isOurDependency)
         )
-        .tap(dependencies => options.verbose && console.debug(`Dependencies found: ${dependencies.map(({name, type}) => `${name} (${type})`).join(", ")}`))
+        .tap(
+            dependencies =>
+                options.verbose &&
+                console.debug(
+                    `Dependencies found: ${dependencies
+                        .map(({ name, type }) => `${name} (${type})`)
+                        .join(", ")}`
+                )
+        )
         .map(dependency =>
             p
                 .resolve(dependency)
                 .then(getGitUrl)
-                .tap(gitUrl => options.verbose && console.debug(`"${dependency.name}" is on ${gitUrl}.`))
+                .tap(
+                    gitUrl =>
+                        options.verbose &&
+                        console.debug(`"${dependency.name}" is on ${gitUrl}.`)
+                )
                 .then(gitUrl => getGitTags(gitUrl, options.verbose))
                 .then(parseLsRemoteResponse)
-                .then(result => Object.assign(dependency, {tags: result}))
+                .then(result => Object.assign(dependency, { tags: result }))
                 .then(dep => findNextVersions(dep, options.verbose))
                 .catch(err => {
                     return {
@@ -47,7 +59,7 @@ function getDependenciesChecker(rule) {
     const check = new RegExp(rule);
     return dependency => {
         return check.test(dependency.name);
-    }
+    };
 }
 
 function getGitUrl(dependency) {
@@ -55,24 +67,32 @@ function getGitUrl(dependency) {
         return dependency.version.replace(/#semver:[^\s]+$/, "");
     }
 
-    throw new Error(`This (${dependency.version}) does not look like link with #semver tag`);
+    throw new Error(
+        `This (${dependency.version}) does not look like link with #semver tag`
+    );
 }
 
 function parseLsRemoteResponse(response) {
     return response
         .split("\n")
-        .map(line => line.includes("refs/tags/") && /refs\/tags\/v?(.+)/.exec(line)[1])
+        .map(
+            line =>
+                line.includes("refs/tags/") &&
+                /refs\/tags\/v?(.+)/.exec(line)[1]
+        )
         .filter(ver => ver);
 }
 
-function findNextVersions({name, type, version, tags}, isVerbose) {
+function findNextVersions({ name, type, version, tags }, isVerbose) {
     if (!version.includes("#semver:")) {
         return null; //how the hell we would get here?
     }
 
     const currentVersion = semver.coerce(/#semver:(.+)/.exec(version)[1]);
     if (isVerbose) {
-        console.debug(`Current version for "${name}" is ${JSON.stringify(currentVersion)}`);
+        console.debug(
+            `Current version for "${name}" is ${JSON.stringify(currentVersion)}`
+        );
     }
 
     return {

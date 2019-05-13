@@ -3,9 +3,7 @@ const logic = require("./index");
 const findClosestPackage = require("./lib/findClosestPackage");
 const drawTable = require("./lib/drawCliTable");
 
-const yargs = require("yargs")
-    .command(require("./yargsModule"))
-    .argv;
+const yargs = require("yargs").command(require("./yargsModule")).argv;
 
 const packagePath = findClosestPackage();
 
@@ -15,17 +13,23 @@ if (!packagePath) {
 }
 
 console.log(`Performing dependency updates check for project: ${packagePath}.`);
-console.log(`Check will be performed for dependencies matching this regex: /${yargs.rule}/.\n`);
+console.log(
+    `Check will be performed for dependencies matching this regex: /${
+        yargs.rule
+    }/.\n`
+);
 
 return logic(packagePath, yargs.rule, yargs)
     .then(dependencies => {
-        const successfulls = dependencies.filter(dep => !dep.error);
-        const updates = successfulls.filter(dep => dep.nextVersion);
+        const successes = dependencies.filter(dep => !dep.error);
+        const updates = successes.filter(dep => dep.nextVersion);
 
         if (!updates.length) {
             console.log("Awesome, all your dependencies are up to date!\n");
         } else {
-            console.log(`You could update ${updates.length} dependency(/-ies). \n`);
+            console.log(
+                `You could update ${updates.length} dependency(/-ies). \n`
+            );
         }
 
         drawTable({
@@ -36,7 +40,7 @@ return logic(packagePath, yargs.rule, yargs)
                 nextVersion: "Next version",
                 latestVersion: "Latest version"
             },
-            data: successfulls
+            data: successes
         });
 
         console.log("");
@@ -46,7 +50,7 @@ return logic(packagePath, yargs.rule, yargs)
 
             if (!fails.length) {
                 console.log("No errors encountered during dependencies check.");
-                return
+                return;
             }
 
             console.log(`There were ${fails.length} failed check(s). \n`);

@@ -10,7 +10,8 @@ module.exports = {
         },
         rule: {
             type: "string",
-            description: "String regex that will be used to match dependency name",
+            description:
+                "String regex that will be used to match dependency name",
             default: ".*"
         },
         verbose: {
@@ -20,7 +21,8 @@ module.exports = {
         },
         showErrors: {
             type: "boolean",
-            description: "Will show additional table with failed to check dependencies if set to true",
+            description:
+                "Will show additional table with failed to check dependencies if set to true",
             default: false
         }
     }
