@@ -22,7 +22,7 @@ console.log(
 return logic(packagePath, yargs.rule, yargs)
     .then(dependencies => {
         const successes = dependencies.filter(dep => !dep.error);
-        const updates = successes.filter(dep => dep.nextVersion);
+        const updates = successes.filter(dep => dep.latestMinor || dep.latestMajor);
 
         if (!updates.length) {
             console.log("Awesome, all your dependencies are up to date!\n");
