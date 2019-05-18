@@ -2,6 +2,8 @@
 const logic = require("./index");
 const findClosestPackage = require("./lib/findClosestPackage");
 const drawTable = require("./lib/drawCliTable");
+const p = require("bluebird");
+const dvcPackageInfo = require("./package");
 
 const yargs = require("yargs").command(require("./yargsModule")).argv;
 
@@ -12,26 +14,41 @@ if (!packagePath) {
     return process.exit(-1);
 }
 
-console.log(`Performing dependency updates check for project: ${packagePath}.`);
-console.log(
-    `Check will be performed for dependencies matching this regex: /${
-        yargs.rule
-    }/.\n`
-);
-
-return logic(packagePath, yargs.rule, yargs)
+return selfCheck(yargs)
+    .then(() => {
+        console.log(
+            `Performing dependency updates check for project: ${packagePath}.`
+        );
+        console.log(
+            `Check will be performed for dependencies matching this regex: /${
+                yargs.rule
+            }/.\n`
+        );
+        return logic.findPackagesToUpdate(packagePath, yargs.rule, yargs);
+    })
     .then(dependencies => {
-        const successes = dependencies.filter(dep => !dep.error);
-        const updates = successes.filter(dep => dep.latestMinor || dep.latestMajor);
+        let visible = dependencies;
 
-        if (!updates.length) {
-            console.log("Awesome, all your dependencies are up to date!\n");
-        } else {
+        if (yargs.hideErrors) {
+            visible = dependencies.filter(dep => !dep.error);
             console.log(
-                `You could update ${updates.length} dependency(/-ies). \n`
+                `${dependencies.length - visible.length} error(s) were hidden.`
             );
         }
 
+        const updates = visible.filter(
+            dep => dep.latestMinor || dep.latestMajor || dep.error
+        );
+
+        if (!updates.length) {
+            console.log("Awesome, all your dependencies are up to date!");
+        } else {
+            console.log(
+                `You could update ${updates.length} dependency(/-ies).`
+            );
+        }
+
+        console.log();
         drawTable({
             headers: {
                 name: "Dependency",
@@ -40,29 +57,42 @@ return logic(packagePath, yargs.rule, yargs)
                 latestMinor: "Latest Minor",
                 latestMajor: "Latest Major"
             },
-            data: successes
+            data: !yargs.next ? updates : visible
         });
-
-        console.log("");
-
-        if (yargs.showErrors) {
-            const fails = dependencies.filter(dep => dep.error);
-
-            if (!fails.length) {
-                console.log("No errors encountered during dependencies check.");
-                return;
-            }
-
-            console.log(`There were ${fails.length} failed check(s). \n`);
-
-            drawTable({
-                headers: {
-                    name: "Dependency",
-                    type: "Type",
-                    error: "Error"
-                },
-                data: fails
-            });
-        }
     })
     .catch(console.error);
+
+function selfCheck(options) {
+    //this lib checks if the dependencies are up to date, i would say it just in character  :P
+    if (!options.selfCheck) {
+        return p.resolve();
+    }
+
+    //TODO do not make the check each time it's ran, make it daily?
+    return logic
+        .getListOfTags(dvcPackageInfo, options)
+        .then(tags =>
+            logic.findNextVersions(
+                Object.assign(
+                    {
+                        tags
+                    },
+                    dvcPackageInfo
+                ),
+                options.verbose
+            )
+        )
+        .then(({ latestMinor, latestMajor }) => {
+            if (latestMinor || latestMajor) {
+                const whatVersion = latestMajor ? "major" : "minor";
+                console.warn(
+                    `There is new ${whatVersion} version (${latestMajor ||
+                        latestMinor}) for ${
+                        dvcPackageInfo.name
+                    }. Run "npm i -g ${dvcPackageInfo.name}" to upgrade from v${
+                        dvcPackageInfo.version
+                    }.\n`
+                );
+            }
+        });
+}

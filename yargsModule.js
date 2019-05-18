@@ -14,16 +14,21 @@ module.exports = {
                 "String regex that will be used to match dependency name",
             default: ".*"
         },
+        "no-self-check": {
+            type: "boolean",
+            description: "Omits version check for this code"
+        },
+        "no-next": {
+            type: "boolean",
+            description: "Hide entries that are up to date"
+        },
         verbose: {
             type: "boolean",
-            description: "Printing a lot of debug data if set to true",
-            default: false
+            description: "Printing a lot of debug data"
         },
-        showErrors: {
+        "hide-errors": {
             type: "boolean",
-            description:
-                "Will show additional table with failed to check dependencies if set to true",
-            default: false
+            description: "Hide errors in the table"
         }
     }
 };

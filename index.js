@@ -5,7 +5,13 @@ const path = require("path");
 const readFilePromise = p.promisify(require("fs").readFile);
 const semver = require("semver");
 
-module.exports = function findPackagesToUpdate(pckPath, rule, options) {
+module.exports = {
+    findPackagesToUpdate,
+    getListOfTags,
+    findNextVersions
+};
+
+function findPackagesToUpdate(pckPath, rule, options) {
     if (options.verbose) {
         console.debug(`Found package file: ${pckPath}. Rule set to ${rule}.`);
     }
@@ -46,7 +52,7 @@ module.exports = function findPackagesToUpdate(pckPath, rule, options) {
                     };
                 })
         );
-};
+}
 
 function getDependenciesChecker(rule) {
     const check = new RegExp(rule);
