@@ -18,7 +18,7 @@ module.exports = {
             type: "boolean",
             description: "Omits version check for this code"
         },
-        "no-next": {
+        "hide-next": {
             type: "boolean",
             description: "Hide entries that are up to date"
         },

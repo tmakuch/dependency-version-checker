@@ -7,9 +7,9 @@
     "check-dep-versions": "cli.js"
   },
   "scripts": {
-    "test-case-1": "cd tests/testProj1 && node ../../cli.js && cd ../..",
-    "test-case-2": "cd tests/testProj1 && node ../../cli.js lod && cd ../..",
-    "test-case-3": "cd tests/testProj1 && node ../../cli.js --show-errors && cd ../..",
+    "test-case-1": "cd test/testProj1 && node ../../cli.js && cd ../..",
+    "test-case-2": "cd test/testProj1 && node ../../cli.js lod && cd ../..",
+    "test-case-3": "cd test/testProj1 && node ../../cli.js --show-errors && cd ../..",
     "test": "npm run test-case-1 && npm run test-case-2 && npm run test-case-3"
   },
   "author": "Tadeusz Makuch",
@@ -23,9 +23,11 @@
   },
   "directories": {
     "lib": "lib",
-    "test": "tests"
+    "test": "test"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "jasmine": "^3.4.0"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/tmakuch/dependency-version-checker.git"

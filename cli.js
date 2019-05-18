@@ -57,7 +57,8 @@ return selfCheck(yargs)
                 latestMinor: "Latest Minor",
                 latestMajor: "Latest Major"
             },
-            data: !yargs.next ? updates : visible
+            errorFromColumn: 2,
+            data: yargs.hideNext ? updates : visible
         });
     })
     .catch(console.error);

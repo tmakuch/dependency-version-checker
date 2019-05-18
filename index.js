@@ -45,10 +45,13 @@ function findPackagesToUpdate(pckPath, rule, options) {
                 .then(result => Object.assign(dependency, { tags: result }))
                 .then(dep => findNextVersions(dep, options.verbose))
                 .catch(err => {
+                    if (options.verbose) {
+                        console.error(err.message || err);
+                    }
                     return {
                         name: dependency.name,
                         type: dependency.type,
-                        error: err.message
+                        error: err.message || "Unhandled error"
                     };
                 })
         );
