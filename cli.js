@@ -5,7 +5,11 @@ const drawTable = require("./lib/drawCliTable");
 const p = require("bluebird");
 const dvcPackageInfo = require("./package");
 
-const yargs = require("yargs").command(require("./yargsModule")).argv;
+const yargs = require("yargs")
+    .help("help", "Use --help per each command to see command specific flags")
+    .command(require("./yargsCommands").check)
+    .demandCommand()
+    .argv;
 
 const packagePath = findClosestPackage();
 

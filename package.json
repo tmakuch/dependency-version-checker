@@ -4,13 +4,10 @@
   "description": "This library allows you to run a check for newer versions against your development and production dependencies, both npm and `git://`/`git+ssh://`.",
   "main": "index.js",
   "bin": {
-    "check-dep-versions": "cli.js"
+    "dep-versions": "cli.js"
   },
   "scripts": {
-    "test-case-1": "cd test/testProj1 && node ../../cli.js && cd ../..",
-    "test-case-2": "cd test/testProj1 && node ../../cli.js lod && cd ../..",
-    "test-case-3": "cd test/testProj1 && node ../../cli.js --show-errors && cd ../..",
-    "test": "npm run test-case-1 && npm run test-case-2 && npm run test-case-3"
+    "test": "jasmine"
   },
   "author": "Tadeusz Makuch",
   "license": "MIT",

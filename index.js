@@ -1,5 +1,5 @@
-const getGitTags = require("./lib/getGitTags");
-const getNpmTags = require("./lib/getNpmTags");
+const gitTags = require("./lib/gitTags");
+const npmTags = require("./lib/npmTags");
 const p = require("bluebird");
 const path = require("path");
 const readFilePromise = p.promisify(require("fs").readFile);
@@ -66,12 +66,9 @@ function getDependenciesChecker(rule) {
 
 function getListOfTags(dependency, options) {
     const doesItLookLikeGitLink = dependency.version.includes("#semver:");
+    const getter = doesItLookLikeGitLink ? gitTags.get : npmTags.get;
 
-    if (doesItLookLikeGitLink) {
-        return p.try(() => getGitTags(dependency, options.verbose));
-    }
-
-    return p.try(() => getNpmTags(dependency.name, options.verbose));
+    return p.try(() => getter(dependency, options.verbose));
 }
 
 function findNextVersions({ name, type, version, tags }, isVerbose) {
