@@ -28,7 +28,7 @@ module.exports = {
             type: "boolean",
             description: "Hide entries that are up to date"
         },
-        "hide-errors": {
+        "hide-error": {
             type: "boolean",
             description: "Hide errors in the table"
         },

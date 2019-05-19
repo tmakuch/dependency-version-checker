@@ -50,7 +50,7 @@ module.exports = {
             type: "boolean",
             description: "Hide dependencies that were not changed"
         },
-        "hide-errors": {
+        "hide-error": {
             type: "boolean",
             description: "Hide errors in the table"
         },
