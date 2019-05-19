@@ -1,5 +1,5 @@
-const gitTags = require("./lib/gitTags");
-const npmTags = require("./lib/npmTags");
+const gitTags = require("./helpers/gitTags");
+const npmTags = require("./helpers/npmTags");
 const p = require("bluebird");
 const path = require("path");
 const readFilePromise = p.promisify(require("fs").readFile);

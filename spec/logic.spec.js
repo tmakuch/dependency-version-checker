@@ -1,6 +1,6 @@
-const logic = require("../index");
-const gitTags = require("../lib/gitTags");
-const npmTags = require("../lib/npmTags");
+const logic = require("../src/logic");
+const gitTags = require("../src/helpers/gitTags");
+const npmTags = require("../src/helpers/npmTags");
 const testPackagePath = require("path").join(__dirname, "/package.json");
 
 const tags = {

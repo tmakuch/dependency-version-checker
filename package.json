@@ -2,7 +2,7 @@
   "name": "dependency-version-checker",
   "version": "0.3.1",
   "description": "This library allows you to run a check for newer versions against your development and production dependencies, both npm and `git://`/`git+ssh://`.",
-  "main": "index.js",
+  "main": "src/logic.js",
   "bin": {
     "dep-versions": "cli.js"
   },
@@ -19,7 +19,7 @@
     "yargs": "^13.2.4"
   },
   "directories": {
-    "lib": "lib",
+    "lib": "src",
     "test": "test"
   },
   "devDependencies": {
