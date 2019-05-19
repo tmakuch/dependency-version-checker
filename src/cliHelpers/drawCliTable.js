@@ -1,29 +1,41 @@
 module.exports = drawTable;
 
-function drawTable({ headers, errorFromColumn, data }) {
-    const columns = getColumns(data.concat(headers));
+function drawTable({ headers, customEntry, data }) {
+    const columns = Object.entries(getColumns(data.concat(headers))).reduce(
+        (result, [columnName, columnWidth]) => {
+            if (headers[columnName]) {
+                result[columnName] = columnWidth;
+            }
+            return result;
+        },
+        {}
+    );
     console.log(getLine({ columns, entry: headers }));
     console.log(getLine({ columns, entry: {}, padding: "=" }));
     data.forEach(entry =>
-        console.log(getLine({ columns, entry, errorFromColumn }))
+        console.log(getLine({ columns, entry, customEntry }))
     );
 }
 
 function getLine({
     columns,
     entry,
-    errorFromColumn = 1,
+    customEntry: {
+        getter: customEntryGetter,
+        fromColumn: rawCustomEntryFromColumn
+    } = {},
     padding = " ",
     delimiter = "  "
 }) {
-    const containsError = entry && entry.error;
+    const isCustomEntryApplicable = customEntryGetter && customEntryGetter(entry);
+    const customEntryFromColumn = rawCustomEntryFromColumn && rawCustomEntryFromColumn.call ? rawCustomEntryFromColumn(entry) : rawCustomEntryFromColumn;
     return Object.entries(columns).reduce((result, [propName, length], idx) => {
-        if (containsError) {
-            if (idx > errorFromColumn) {
+        if (isCustomEntryApplicable) {
+            if (idx > customEntryFromColumn) {
                 return result;
             }
-            if (idx === errorFromColumn) {
-                const propValue = getSafePropVal(entry.error);
+            if (idx === customEntryFromColumn) {
+                const propValue = getSafePropVal(customEntryGetter(entry));
                 return result + propValue.padEnd(length, padding) + delimiter;
             }
         }
@@ -41,7 +53,6 @@ function getColumns(array) {
                 columns[propName] || 0
             );
         });
-        delete columns.error;
         return columns;
     }, {});
 }

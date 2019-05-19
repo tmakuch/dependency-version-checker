@@ -4,7 +4,7 @@ const dvcPackageInfo = require("../../package.json");
 
 module.exports = function selfCheck(options) {
     //this src checks if the dependencies are up to date, i would say it just in character  :P
-    if (!options.selfCheck) {
+    if (options.selfCheck === false) {
         return p.resolve();
     }
 

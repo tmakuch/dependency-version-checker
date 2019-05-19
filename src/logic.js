@@ -4,6 +4,7 @@ const p = require("bluebird");
 const path = require("path");
 const readFilePromise = p.promisify(require("fs").readFile);
 const semver = require("semver");
+const DEP_TYPE = require("./enums/DEP_TYPE");
 
 module.exports = {
     findPackagesToUpdate,
@@ -23,10 +24,10 @@ function findPackagesToUpdate(pckPath, rule, options) {
         .then(pck =>
             [
                 ...Object.entries(pck.dependencies || []).map(
-                    ([name, version]) => ({ name, type: "Prod", version })
+                    ([name, version]) => ({ name, type: DEP_TYPE.PROD, version })
                 ),
                 ...Object.entries(pck.devDependencies || []).map(
-                    ([name, version]) => ({ name, type: "Dev", version })
+                    ([name, version]) => ({ name, type: DEP_TYPE.DEV, version })
                 )
             ].filter(isOurDependency)
         )

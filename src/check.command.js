@@ -6,7 +6,7 @@ const p = require("bluebird");
 
 module.exports = {
     command: "check [rule]",
-    describe: "Check all git dependencies for updates",
+    describe: "Check all dependencies for updates",
     builder: {
         help: {
             hidden: true
@@ -24,7 +24,7 @@ module.exports = {
             type: "boolean",
             description: "Omits version check for this code"
         },
-        "hide-next": {
+        "hide-empty": {
             type: "boolean",
             description: "Hide entries that are up to date"
         },
@@ -90,8 +90,11 @@ function handler(yargs) {
                     latestMinor: "Latest Minor",
                     latestMajor: "Latest Major"
                 },
-                errorFromColumn: 2,
-                data: yargs.hideNext ? updates : visible
+                customEntry: {
+                    fromColumn: 2,
+                    getter: entry => entry.error
+                },
+                data: yargs.hideEmpty ? updates : visible
             });
         })
         .catch(console.error);
