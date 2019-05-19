@@ -1,4 +1,4 @@
-const findClosestPackage = require("./cli/findClosestPackage");
+const findClosestPackage = require("./cliHelpers/findClosestPackage");
 
 module.exports = () => {
     const packagePath = findClosestPackage();

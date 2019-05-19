@@ -1,6 +1,8 @@
 const logic = require("./logic");
-const selfCheck = require("./cli/selfCheck");
-const drawTable = require("./cli/drawCliTable");
+const selfCheck = require("./cliHelpers/selfCheck");
+const drawTable = require("./cliHelpers/drawCliTable");
+const spinner = require("./cliHelpers/spinner")();
+const p = require("bluebird");
 
 module.exports = {
     command: "check [rule]",
@@ -49,9 +51,14 @@ function handler(yargs) {
                     yargs.rule
                 }/.\n`
             );
-            return logic.findPackagesToUpdate(yargs.packagePath, yargs.rule, yargs);
+
+            return p.props({
+                spinnerInstance: spinner.start("Getting dependencies versions."),
+                dependencies: logic.findPackagesToUpdate(yargs.packagePath, yargs.rule, yargs)
+            });
         })
-        .then(dependencies => {
+        .then(({ spinnerInstance, dependencies }) => {
+            spinnerInstance.stop();
             let visible = dependencies;
 
             if (yargs.hideErrors) {
