@@ -5,6 +5,7 @@ const path = require("path");
 const readFilePromise = p.promisify(require("fs").readFile);
 const semver = require("semver");
 const DEP_TYPE = require("./enums/DEP_TYPE");
+const loggerInit = require("./cliHelpers/logger");
 
 module.exports = {
     findPackagesToUpdate,
@@ -13,9 +14,8 @@ module.exports = {
 };
 
 function findPackagesToUpdate(pckPath, rule, options) {
-    if (options.verbose) {
-        console.debug(`Found package file: ${pckPath}. Rule set to ${rule}.`);
-    }
+    const logger = loggerInit(options);
+    logger.debug(`Found package file: ${pckPath}. Rule set to ${rule}.`);
 
     const isOurDependency = getDependenciesChecker(rule);
 
@@ -24,31 +24,31 @@ function findPackagesToUpdate(pckPath, rule, options) {
         .then(pck =>
             [
                 ...Object.entries(pck.dependencies || []).map(
-                    ([name, version]) => ({ name, type: DEP_TYPE.PROD, version })
+                    ([name, version]) => ({
+                        name,
+                        type: DEP_TYPE.PROD,
+                        version
+                    })
                 ),
                 ...Object.entries(pck.devDependencies || []).map(
                     ([name, version]) => ({ name, type: DEP_TYPE.DEV, version })
                 )
             ].filter(isOurDependency)
         )
-        .tap(
-            dependencies =>
-                options.verbose &&
-                console.debug(
-                    `Dependencies found: ${dependencies
-                        .map(({ name, type }) => `${name} (${type})`)
-                        .join(", ")}`
-                )
+        .tap(dependencies =>
+            logger.debug(
+                `Dependencies found: ${dependencies
+                    .map(({ name, type }) => `${name} (${type})`)
+                    .join(", ")}`
+            )
         )
         .map(dependency =>
             p
-                .try(() => getListOfTags(dependency, options))
+                .try(() => getListOfTags(dependency, logger))
                 .then(result => Object.assign(dependency, { tags: result }))
-                .then(dep => findNextVersions(dep, options.verbose))
+                .then(dep => findNextVersions(dep, logger))
                 .catch(err => {
-                    if (options.verbose) {
-                        console.error(err.message || err);
-                    }
+                    logger.childError(err.message || err);
                     return {
                         name: dependency.name,
                         type: dependency.type,
@@ -65,14 +65,14 @@ function getDependenciesChecker(rule) {
     };
 }
 
-function getListOfTags(dependency, options) {
+function getListOfTags(dependency, logger) {
     const doesItLookLikeGitLink = dependency.version.includes("#semver:");
     const getter = doesItLookLikeGitLink ? gitTags.get : npmTags.get;
 
-    return p.try(() => getter(dependency, options.verbose));
+    return p.try(() => getter(dependency, logger));
 }
 
-function findNextVersions({ name, type, version, tags }, isVerbose) {
+function findNextVersions({ name, type, version, tags }, logger) {
     let currentVersion;
 
     if (version.includes("#semver:")) {
@@ -81,11 +81,9 @@ function findNextVersions({ name, type, version, tags }, isVerbose) {
         currentVersion = semver.coerce(version);
     }
 
-    if (isVerbose) {
-        console.debug(
-            `Current version for "${name}" is ${JSON.stringify(currentVersion)}`
-        );
-    }
+    logger.debug(
+        `Current version for "${name}" is ${JSON.stringify(currentVersion)}`
+    );
 
     const latestMinor = semver.maxSatisfying(
         tags,

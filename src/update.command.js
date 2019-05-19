@@ -1,9 +1,9 @@
 const logic = require("./logic");
 const drawTable = require("./cliHelpers/drawCliTable");
-const spinner = require("./cliHelpers/spinner")();
 const p = require("bluebird");
 const fs = p.promisifyAll(require("fs"));
 const DEP_TYPE = require("./enums/DEP_TYPE");
+const loggerInit = require("./cliHelpers/logger");
 
 module.exports = {
     command: "update [rule]",
@@ -24,23 +24,23 @@ module.exports = {
         },
         "ignore-minor": {
             type: "boolean",
-            description: "Does not update dependencies with minor version. Can't be used with --ignore-major"
+            description:
+                "Does not update dependencies with minor version. Can't be used with --ignore-major"
         },
         "ignore-major": {
             type: "boolean",
-            description: "Does not update dependencies with major version. Can't be used with --ignore-minor"
+            description:
+                "Does not update dependencies with major version. Can't be used with --ignore-minor"
         },
         "ignore-dev": {
             type: "boolean",
-            description: "Does not update dev dependencies. Can't be used with --ignore-prod"
+            description:
+                "Does not update dev dependencies. Can't be used with --ignore-prod"
         },
         "ignore-prod": {
             type: "boolean",
-            description: "Does not update prod dependencies. Can't be used with --ignore-dev"
-        },
-        verbose: {
-            type: "boolean",
-            description: "Printing a lot of debug data"
+            description:
+                "Does not update prod dependencies. Can't be used with --ignore-dev"
         },
         "hide-ignored": {
             type: "boolean",
@@ -53,6 +53,14 @@ module.exports = {
         "hide-errors": {
             type: "boolean",
             description: "Hide errors in the table"
+        },
+        silent: {
+            type: "boolean",
+            description: "Shows only table"
+        },
+        verbose: {
+            type: "boolean",
+            description: "Printing a lot of debug data"
         }
     },
     handler
@@ -64,11 +72,12 @@ const depContainerNames = {
 };
 
 function handler(yargs) {
+    const logger = loggerInit(yargs);
     if (
         (yargs.ignoreMinor && yargs.ignoreMajor) ||
         (yargs.ignoreProd && yargs.ignoreDev)
     ) {
-        console.error(
+        logger.error(
             "Wait, what do you want from me?\nCheck --help for list of right arguments - you've provided excluding filters."
         );
         return process.exit(-1);
@@ -76,21 +85,21 @@ function handler(yargs) {
 
     return p
         .try(() => {
-            console.log(
+            logger.log(
                 `Performing dependency updates check for project: ${
                     yargs.packagePath
                 }.`
             );
-            console.log(
+            logger.log(
                 `Check will be performed for dependencies matching this regex: /${
                     yargs.rule
                 }/.\n`
             );
 
             return p.props({
-                spinnerInstance: spinner.start(
-                    "Getting dependencies versions."
-                ),
+                spinnerInstance:
+                    logger.spinner &&
+                    logger.spinner.start("Getting dependencies versions."),
                 packageJson: fs
                     .readFileAsync(yargs.packagePath)
                     .then(JSON.parse),
@@ -102,7 +111,10 @@ function handler(yargs) {
             });
         })
         .then(({ spinnerInstance, packageJson, dependencies }) => {
-            spinnerInstance.stop();
+            if (spinnerInstance) {
+                spinnerInstance.stop();
+            }
+
             dependencies.forEach(dependency => {
                 if (
                     (dependency.type === DEP_TYPE.DEV && yargs.ignoreDev) ||
@@ -152,7 +164,7 @@ function handler(yargs) {
 
             if (yargs.hideErrors) {
                 filtered = filtered.filter(dep => !dep.error);
-                console.log(
+                logger.log(
                     `${dependencies.length -
                         filtered.length} error(s) were hidden.`
                 );
@@ -161,7 +173,7 @@ function handler(yargs) {
             if (yargs.hideUnchanged) {
                 const before = filtered.length;
                 filtered = filtered.filter(dep => dep.updatedTo || dep.error);
-                console.log(
+                logger.log(
                     `${before -
                         filtered.length} unchanged dependenct(-ies) were hidden.`
                 );
@@ -170,13 +182,13 @@ function handler(yargs) {
             if (yargs.hideIgnored) {
                 const before = filtered.length;
                 filtered = filtered.filter(dep => !dep.ignored);
-                console.log(
+                logger.log(
                     `${before -
                         filtered.length} ignored dependency(-ies) were hidden.`
                 );
             }
 
-            console.log();
+            logger.log();
             drawTable({
                 headers: {
                     name: "Dependency",
@@ -193,7 +205,9 @@ function handler(yargs) {
                 data: filtered
             });
 
-            console.log("\nRemember to run 'npm install' to install the dependencies.")
+            logger.log(
+                "\nRemember to run 'npm install' to install the dependencies."
+            );
         })
-        .catch(console.error);
+        .catch(logger.error);
 }

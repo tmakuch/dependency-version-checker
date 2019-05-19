@@ -1,8 +1,8 @@
 const logic = require("./logic");
 const selfCheck = require("./cliHelpers/selfCheck");
 const drawTable = require("./cliHelpers/drawCliTable");
-const spinner = require("./cliHelpers/spinner")();
 const p = require("bluebird");
+const loggerInit = require("./cliHelpers/logger");
 
 module.exports = {
     command: "check [rule]",
@@ -28,60 +28,71 @@ module.exports = {
             type: "boolean",
             description: "Hide entries that are up to date"
         },
-        verbose: {
-            type: "boolean",
-            description: "Printing a lot of debug data"
-        },
         "hide-errors": {
             type: "boolean",
             description: "Hide errors in the table"
+        },
+        silent: {
+            type: "boolean",
+            description: "Shows only table"
+        },
+        verbose: {
+            type: "boolean",
+            description: "Printing a lot of debug data"
         }
     },
     handler
 };
 
 function handler(yargs) {
+    const logger = loggerInit(yargs);
     return selfCheck(yargs)
         .then(() => {
-            console.log(
+            logger.log(
                 `Performing dependency updates check for project: ${yargs.packagePath}.`
             );
-            console.log(
+            logger.log(
                 `Check will be performed for dependencies matching this regex: /${
                     yargs.rule
                 }/.\n`
             );
 
             return p.props({
-                spinnerInstance: spinner.start("Getting dependencies versions."),
+                spinnerInstance: logger.spinner && logger.spinner.start("Getting dependencies versions."),
                 dependencies: logic.findPackagesToUpdate(yargs.packagePath, yargs.rule, yargs)
             });
         })
         .then(({ spinnerInstance, dependencies }) => {
-            spinnerInstance.stop();
+            if (spinnerInstance) {
+                spinnerInstance.stop();
+            }
+
             let visible = dependencies;
 
             if (yargs.hideErrors) {
                 visible = dependencies.filter(dep => !dep.error);
-                console.log(
+                logger.log(
                     `${dependencies.length -
                         visible.length} error(s) were hidden.`
                 );
             }
 
-            const updates = visible.filter(
+            const nonEmpty = visible.filter(
                 dep => dep.latestMinor || dep.latestMajor || dep.error
             );
 
+            const updates = nonEmpty.filter(
+                dep => dep.latestMinor || dep.latestMajor
+            );
             if (!updates.length) {
-                console.log("Awesome, all your dependencies are up to date!");
+                logger.log("Awesome, all your dependencies are up to date!");
             } else {
-                console.log(
+                logger.log(
                     `You could update ${updates.length} dependency(/-ies).`
                 );
             }
 
-            console.log();
+            logger.log();
             drawTable({
                 headers: {
                     name: "Dependency",
@@ -94,8 +105,8 @@ function handler(yargs) {
                     fromColumn: 2,
                     getter: entry => entry.error
                 },
-                data: yargs.hideEmpty ? updates : visible
+                data: yargs.hideEmpty ? nonEmpty : visible
             });
         })
-        .catch(console.error);
+        .catch(logger.error);
 }

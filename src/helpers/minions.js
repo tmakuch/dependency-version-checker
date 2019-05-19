@@ -5,10 +5,9 @@ module.exports = {
     spawn: spawnMinions
 };
 
-function spawnMinions(command, isVerbose) {
-    if (isVerbose) {
-        console.debug(`Running '${command}'.`);
-    }
+function spawnMinions(command, logger) {
+    logger.debug(`Running '${command}'.`);
+
     const childProcess = spawnShell(command, {
         stdio: [0, "pipe", "pipe"],
         env: process.env
@@ -18,8 +17,8 @@ function spawnMinions(command, isVerbose) {
         childProcess.stdout
             .pipe(
                 concat({ encoding: "string" }, result => {
-                    if (isVerbose && result) {
-                        console.debug(
+                    if (result) {
+                        logger.debug(
                             `Standard output for ${command} is:\n ${result}`
                         );
                     }
@@ -34,8 +33,8 @@ function spawnMinions(command, isVerbose) {
         childProcess.stderr
             .pipe(
                 concat({ encoding: "string" }, result => {
-                    if (isVerbose && result) {
-                        console.debug(
+                    if (result) {
+                        logger.debug(
                             `Error output for ${command} is:\n ${result}`
                         );
                     }

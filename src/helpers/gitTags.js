@@ -5,18 +5,14 @@ module.exports = {
     get: getGitTags
 };
 
-function getGitTags(dependency, isVerbose) {
+function getGitTags(dependency, logger) {
     return p
         .try(() => getGitUrl(dependency))
-        .tap(
-            gitUrl =>
-                isVerbose &&
-                console.debug(`"${dependency.name}" is on ${gitUrl}.`)
-        )
+        .tap(gitUrl => logger.debug(`"${dependency.name}" is on ${gitUrl}.`))
         .then(gitUrl =>
             minions.spawn(
                 `git ls-remote --tags --refs --sort="-v:refname" ${gitUrl}`,
-                isVerbose
+                logger
             )
         )
         .then(parseLsRemoteResponse);
