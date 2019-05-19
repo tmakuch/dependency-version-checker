@@ -13,17 +13,18 @@ For npm, there's no support for custom, manual repositories. If you're using cus
 Configure your npm, git and ssh if you have private repos.  
 
 ## Installation
-`npm install -g git://github.com/tmakuch/dependency-version-checker.git`
+`npm install -g dependency-version-checker`
 
 ## Usage
 Run in your project (you do not need to be exactly in root):
 
 ```
 dep-versions --help
-dep-versions check [rule]
+dep-versions check [rule] //checks dependencies and prints them in table
+dep-versions update [rule] //checks dependencies and update them in found package.json
 ```
 
-#### Check command
+#### Rule parameter
 * Rule parameter is a string by which successful match against the dependencies.
 * Rule parameter may be omitted, but check will be executed against all the dependencies.
   
