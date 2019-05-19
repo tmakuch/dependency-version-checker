@@ -18,25 +18,29 @@ Configure your npm, git and ssh if you have private repos.
 ## Usage
 Run in your project (you do not need to be exactly in root):
 
-`check-dep-versions [rule]`
+```
+dep-versions --help
+dep-versions check [rule]
+```
 
+#### Check command
 * Rule parameter is a string by which successful match against the dependencies.
 * Rule parameter may be omitted, but check will be executed against all the dependencies.
   
-#### Example from the "tests"
+#### Example
 
 ```
-$check-dep-versions lod
-Performing dependency updates check for project: ~\Projects\depdency-version-checker\tests\testProj1\package.json.
+$dep-versions check lod
+Performing dependency updates check for project: D:\Documents\Projects\depdency-version-checker\spec\package.json.
 Check will be performed for dependencies matching this regex: /lod/.
 
-You could update 1 dependency(/-ies). 
+You could update 1 dependency(/-ies).
 
 Dependency  Type  Current Version  Latest Minor  Latest Major  
 ==========  ====  ===============  ============  ============  
-lodash      Prod  3.0.0            3.10.1        4.17.11       
+lodash      Prod  3.0.0            3.10.1        4.17.11     
 ```
 
 #### Debugging
 
-Run `check-dep-versions --help` to see additional flags.
+Run `dep-versions <command> --help` to see additional flags.
