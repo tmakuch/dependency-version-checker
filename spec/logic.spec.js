@@ -38,7 +38,7 @@ describe("logic", () => {
                     {
                         name: "undercore",
                         type: "Prod",
-                        error: "nope"
+                        error: "Error caught: nope"
                     },
                     {
                         name: "eslint",
@@ -57,7 +57,7 @@ describe("logic", () => {
                     {
                         name: "something-that-should-not-exist",
                         type: "Dev",
-                        error: "nope"
+                        error: "Error caught: nope"
                     }
                 ])
             ));

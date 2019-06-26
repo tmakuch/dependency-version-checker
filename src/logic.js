@@ -52,7 +52,7 @@ function findPackagesToUpdate(pckPath, rule, options) {
                     return {
                         name: dependency.name,
                         type: dependency.type,
-                        error: err.message || "Unhandled error"
+                        error: "Error caught: " + (err.message || "-unhandled-")
                     };
                 })
         );
@@ -74,6 +74,15 @@ function getListOfTags(dependency, logger) {
 
 function findNextVersions({ name, type, version, tags }, logger) {
     let currentVersion;
+    const safeTags = tags.map(tag => {
+        const safe = semver.coerce(tag);
+
+        if (!safe) {
+            logger.debug(`Package ${name} has a strange tag (${tag}) - it couldn't be parsed by semver lib.`);
+        }
+
+        return safe
+    });
 
     if (version.includes("#semver:")) {
         currentVersion = semver.coerce(/#semver:(.+)/.exec(version)[1]);
@@ -86,11 +95,11 @@ function findNextVersions({ name, type, version, tags }, logger) {
     );
 
     const latestMinor = semver.maxSatisfying(
-        tags,
+        safeTags,
         `>${currentVersion.version} <${currentVersion.major + 1}`
     );
     const latestMajor = semver.maxSatisfying(
-        tags,
+        safeTags,
         `>${currentVersion.version}`
     );
 
@@ -98,7 +107,7 @@ function findNextVersions({ name, type, version, tags }, logger) {
         name,
         type,
         currentVersion: currentVersion.version,
-        latestMinor,
-        latestMajor: latestMajor !== latestMinor ? latestMajor : null
+        latestMinor: latestMinor && latestMinor.raw,
+        latestMajor: latestMajor !== latestMinor ? (latestMajor && latestMajor.raw) : null
     };
 }

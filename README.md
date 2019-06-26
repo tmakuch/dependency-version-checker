@@ -10,7 +10,13 @@ For git, if you're able to clone the repo, you're able to check the tags.
 
 For npm, there's no support for custom, manual repositories. If you're using custom repository, make it work without any additional parameters. 
 
-Configure your npm, git and ssh if you have private repos.  
+Configure your npm, git and ssh if you have private repos.
+
+## Disclaimer
+This is "for dev by dev" tool. They may be some assumptions made, so do not hesitate to look into verbose logs if something seems not right.
+
+Still, I'll try to list all assumptions in this file.
+* Tags are in semver, if they do not pass semver parsing they do not show in the list.   
 
 ## Installation
 `npm install -g dependency-version-checker`
