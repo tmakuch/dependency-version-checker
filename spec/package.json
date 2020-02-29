@@ -12,7 +12,8 @@
     "lodash": "git://github.com/lodash/lodash.git#semver:^3.0.0",
     "undercore": "git://github.com/jashkenas/underscore.git#semver:^1.5.0",
     "eslint": "git://github.com/eslint/eslint.git#semver:^5.16.0",
-    "immutable": "^3.7.6"
+    "immutable": "^3.7.6",
+    "backbone-redux-migrator": "git://github.com/naugtur/backbone-redux-migrator.git#semver:^1.1.0-1"
   },
   "devDependencies": {
     "something-that-should-not-exist": "broken-version"

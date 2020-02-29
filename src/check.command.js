@@ -3,44 +3,24 @@ const selfCheck = require("./cliHelpers/selfCheck");
 const drawTable = require("./cliHelpers/drawCliTable");
 const p = require("bluebird");
 const loggerInit = require("./cliHelpers/logger");
+const commons = require("./commandsCommons");
 
 module.exports = {
     command: "check [rule]",
     describe: "Check all dependencies for updates",
-    builder: {
-        help: {
-            hidden: true
+    builder: Object.assign(
+        {
+            "no-self-check": {
+                type: "boolean",
+                description: "Omits version check for this code"
+            },
+            "hide-empty": {
+                type: "boolean",
+                description: "Hide entries that are up to date"
+            }
         },
-        version: {
-            hidden: true
-        },
-        rule: {
-            type: "string",
-            description:
-                "String regex that will be used to match dependency name",
-            default: ".*"
-        },
-        "no-self-check": {
-            type: "boolean",
-            description: "Omits version check for this code"
-        },
-        "hide-empty": {
-            type: "boolean",
-            description: "Hide entries that are up to date"
-        },
-        "hide-error": {
-            type: "boolean",
-            description: "Hide errors in the table"
-        },
-        silent: {
-            type: "boolean",
-            description: "Shows only table"
-        },
-        verbose: {
-            type: "boolean",
-            description: "Printing a lot of debug data"
-        }
-    },
+        commons.options
+    ),
     handler
 };
 
@@ -49,7 +29,9 @@ function handler(yargs) {
     return selfCheck(yargs)
         .then(() => {
             logger.log(
-                `Performing dependency updates check for project: ${yargs.packagePath}.`
+                `Performing dependency updates check for project: ${
+                    yargs.packagePath
+                }.`
             );
             logger.log(
                 `Check will be performed for dependencies matching this regex: /${
@@ -58,8 +40,14 @@ function handler(yargs) {
             );
 
             return p.props({
-                spinnerInstance: logger.spinner && logger.spinner.start("Getting dependencies versions."),
-                dependencies: logic.findPackagesToUpdate(yargs.packagePath, yargs.rule, yargs)
+                spinnerInstance:
+                    logger.spinner &&
+                    logger.spinner.start("Getting dependencies versions."),
+                dependencies: logic.findPackagesToUpdate(
+                    yargs.packagePath,
+                    yargs.rule,
+                    yargs
+                )
             });
         })
         .then(({ spinnerInstance, dependencies }) => {

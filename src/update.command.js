@@ -4,65 +4,45 @@ const p = require("bluebird");
 const fs = p.promisifyAll(require("fs"));
 const DEP_TYPE = require("./enums/DEP_TYPE");
 const loggerInit = require("./cliHelpers/logger");
+const commons = require("./commandsCommons");
 
 module.exports = {
     command: "update [rule]",
     describe:
         "Check all dependencies versions and update package.json file with latest version of each file",
-    builder: {
-        help: {
-            hidden: true
+    builder: Object.assign(
+        {
+            "ignore-minor": {
+                type: "boolean",
+                description:
+                    "Does not update dependencies with minor version. Can't be used with --ignore-major"
+            },
+            "ignore-major": {
+                type: "boolean",
+                description:
+                    "Does not update dependencies with major version. Can't be used with --ignore-minor"
+            },
+            "ignore-dev": {
+                type: "boolean",
+                description:
+                    "Does not update dev dependencies. Can't be used with --ignore-prod"
+            },
+            "ignore-prod": {
+                type: "boolean",
+                description:
+                    "Does not update prod dependencies. Can't be used with --ignore-dev"
+            },
+            "hide-ignored": {
+                type: "boolean",
+                description: "Hide ignored dependencies"
+            },
+            "hide-unchanged": {
+                type: "boolean",
+                description: "Hide dependencies that were not changed"
+            }
         },
-        version: {
-            hidden: true
-        },
-        rule: {
-            type: "string",
-            description:
-                "String regex that will be used to match dependency name",
-            default: ".*"
-        },
-        "ignore-minor": {
-            type: "boolean",
-            description:
-                "Does not update dependencies with minor version. Can't be used with --ignore-major"
-        },
-        "ignore-major": {
-            type: "boolean",
-            description:
-                "Does not update dependencies with major version. Can't be used with --ignore-minor"
-        },
-        "ignore-dev": {
-            type: "boolean",
-            description:
-                "Does not update dev dependencies. Can't be used with --ignore-prod"
-        },
-        "ignore-prod": {
-            type: "boolean",
-            description:
-                "Does not update prod dependencies. Can't be used with --ignore-dev"
-        },
-        "hide-ignored": {
-            type: "boolean",
-            description: "Hide ignored dependencies"
-        },
-        "hide-unchanged": {
-            type: "boolean",
-            description: "Hide dependencies that were not changed"
-        },
-        "hide-error": {
-            type: "boolean",
-            description: "Hide errors in the table"
-        },
-        silent: {
-            type: "boolean",
-            description: "Shows only table"
-        },
-        verbose: {
-            type: "boolean",
-            description: "Printing a lot of debug data"
-        }
-    },
+        commons.options
+    ),
     handler
 };
 

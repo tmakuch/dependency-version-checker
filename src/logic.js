@@ -7,6 +7,8 @@ const semver = require("semver");
 const DEP_TYPE = require("./enums/DEP_TYPE");
 const loggerInit = require("./cliHelpers/logger");
 
+const semverOptions = { loose: true, includePrerelease: true };
+
 module.exports = {
     findPackagesToUpdate,
     getListOfTags,
@@ -46,7 +48,7 @@ function findPackagesToUpdate(pckPath, rule, options) {
             p
                 .try(() => getListOfTags(dependency, logger))
                 .then(result => Object.assign(dependency, { tags: result }))
-                .then(dep => findNextVersions(dep, logger))
+                .then(dep => findNextVersions(dep, options, logger))
                 .catch(err => {
                     logger.childError(err.message || err);
                     return {
@@ -72,10 +74,10 @@ function getListOfTags(dependency, logger) {
     return p.try(() => getter(dependency, logger));
 }
 
-function findNextVersions({ name, type, version, tags }, logger) {
+function findNextVersions({ name, type, version, tags }, options, logger) {
     let currentVersion;
     const safeTags = tags.map(tag => {
-        const safe = semver.coerce(tag);
+        const safe = semver(tag, semverOptions);
 
         if (!safe) {
             logger.debug(`Package ${name} has a strange tag (${tag}) - it couldn't be parsed by semver lib.`);
@@ -85,9 +87,13 @@ function findNextVersions({ name, type, version, tags }, logger) {
     });
 
     if (version.includes("#semver:")) {
-        currentVersion = semver.coerce(/#semver:(.+)/.exec(version)[1]);
+        //semver.coerce drops any loose or prerelease info, we do not want it - thus manual cleanup is required
+        const regexped = /#semver:[~^]?(.+)/.exec(version)[1];
+        currentVersion = semver(regexped, semverOptions);
     } else {
-        currentVersion = semver.coerce(version);
+        //semver.coerce drops any loose or prerelease info, we do not want it - thus manual cleanup is required
+        const cleaned = version.replace(/[~^]/, "");
+        currentVersion = semver(cleaned, semverOptions);
     }
 
     logger.debug(
@@ -95,12 +101,18 @@ function findNextVersions({ name, type, version, tags }, logger) {
     );
 
     const latestMinor = semver.maxSatisfying(
-        safeTags,
-        `>${currentVersion.version} <${currentVersion.major + 1}`
+        safeTags.filter(tag => tag.major <= currentVersion.major), // to remove n+1.0.0-rc1 from >n.x.y searches when including prereleases
+        `>${currentVersion.version} <${currentVersion.major + 1}`,
+        {
+            includePrerelease: options.includePrerelease
+        }
     );
     const latestMajor = semver.maxSatisfying(
         safeTags,
-        `>${currentVersion.version}`
+        `>${currentVersion.version}`,
+        {
+            includePrerelease: options.includePrerelease
+        }
     );
 
     return {

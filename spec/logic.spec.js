@@ -7,7 +7,8 @@ const tags = {
     lodash: ["3.5.1", "4.5.1"],
     underscore: ["1.9.1"],
     eslint: ["5.16.0"],
-    immutable: ["3.8.2"]
+    immutable: ["3.8.2"],
+    "backbone-redux-migrator": ["1.1.0-1", "1.1.0-2", "1.1.0-3"]
 };
 
 describe("logic", () => {
@@ -52,6 +53,13 @@ describe("logic", () => {
                         type: "Prod",
                         currentVersion: "3.7.6",
                         latestMinor: "3.8.2",
+                        latestMajor: null
+                    },
+                    {
+                        name: "backbone-redux-migrator",
+                        type: "Prod",
+                        currentVersion: "1.1.0-1",
+                        latestMinor: "1.1.0-3",
                         latestMajor: null
                     },
                     {

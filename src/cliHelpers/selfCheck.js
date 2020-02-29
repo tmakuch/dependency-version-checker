@@ -23,6 +23,7 @@ module.exports = function selfCheck(options) {
                     },
                     dvcPackageInfo
                 ),
+                {},
                 logger
             )
         )
