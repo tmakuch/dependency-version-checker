@@ -1,4 +1,5 @@
 module.exports = {
     PROD: "Prod",
-    DEV: "Dev"
+    DEV: "Dev",
+    OPT: "Opt",
 };
