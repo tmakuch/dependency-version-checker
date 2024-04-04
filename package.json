@@ -14,17 +14,17 @@
   "dependencies": {
     "bluebird": "^3.5.4",
     "concat-stream": "^2.0.0",
-    "ora": "^3.4.0",
-    "semver": "^6.0.0",
+    "ora": "^5.4.1",
+    "semver": "^6.3.1",
     "spawn-shell": "^2.1.0",
-    "yargs": "^15.1.0"
+    "yargs": "^15.4.1"
   },
   "directories": {
     "lib": "src",
     "test": "test"
   },
   "devDependencies": {
-    "jasmine": "^3.4.0"
+    "jasmine": "^3.99.0"
   },
   "repository": {
     "type": "git",
