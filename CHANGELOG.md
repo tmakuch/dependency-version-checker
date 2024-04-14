@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.2 - 2024.04.04
+
+* also check [optional](https://docs.npmjs.com/cli/v9/commands/npm-install) dependencies
+
 ## 1.0.1 - 2019.06.26
 ### Fixed
 * Custom (non-semver) tags in history were breaking the whole check. Currently they are omitted and only debug is pasted (when on --verbose) in the console.

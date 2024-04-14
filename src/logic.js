@@ -34,6 +34,9 @@ function findPackagesToUpdate(pckPath, rule, options) {
                 ),
                 ...Object.entries(pck.devDependencies || []).map(
                     ([name, version]) => ({ name, type: DEP_TYPE.DEV, version })
+                ),
+                ...Object.entries(pck.optionalDependencies || []).map(
+                    ([name, version]) => ({ name, type: DEP_TYPE.OPT, version })
                 )
             ].filter(isOurDependency)
         )
