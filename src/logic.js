@@ -84,7 +84,8 @@ function getListOfTags(dependency, logger) {
 function findNextVersions({ name, type, version, tags }, options, logger) {
   let currentVersion;
   const safeTags = tags.map((tag) => {
-    const safe = semver(tag, semverOptions);
+
+    const safe = semver.parse(tag, semverOptions);
 
     if (!safe) {
       logger.debug(
@@ -98,11 +99,11 @@ function findNextVersions({ name, type, version, tags }, options, logger) {
   if (version.includes("#semver:")) {
     //semver.coerce drops any loose or prerelease info, we do not want it - thus manual cleanup is required
     const regexped = /#semver:[~^]?(.+)/.exec(version)[1];
-    currentVersion = semver(regexped, semverOptions);
+    currentVersion = semver.parse(regexped, semverOptions);
   } else {
     //semver.coerce drops any loose or prerelease info, we do not want it - thus manual cleanup is required
     const cleaned = version.replace(/[~^]/, "");
-    currentVersion = semver(cleaned, semverOptions);
+    currentVersion = semver.parse(cleaned, semverOptions);
   }
 
   logger.debug(
