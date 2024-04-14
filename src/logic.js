@@ -1,8 +1,7 @@
 const gitTags = require("./helpers/gitTags");
 const npmTags = require("./helpers/npmTags");
-const p = require("bluebird");
 const path = require("path");
-const readFilePromise = p.promisify(require("fs").readFile);
+const fs = require("node:fs/promises");
 const semver = require("semver");
 const DEP_TYPE = require("./enums/DEP_TYPE");
 const loggerInit = require("./cliHelpers/logger");
@@ -21,10 +20,10 @@ function findPackagesToUpdate(pckPath, rule, options) {
 
     const isOurDependency = getDependenciesChecker(rule);
 
-    return readFilePromise(path.resolve(pckPath))
-        .then(JSON.parse)
-        .then(pck =>
-            [
+    return fs.readFile(path.resolve(pckPath))
+        .then(content => JSON.parse(content.toString()))
+        .then(pck => {
+            const dependencies = [
                 ...Object.entries(pck.dependencies || []).map(
                     ([name, version]) => ({
                         name,
@@ -38,29 +37,28 @@ function findPackagesToUpdate(pckPath, rule, options) {
                 ...Object.entries(pck.optionalDependencies || []).map(
                     ([name, version]) => ({ name, type: DEP_TYPE.OPT, version })
                 )
-            ].filter(isOurDependency)
-        )
-        .tap(dependencies =>
+            ].filter(isOurDependency);
             logger.debug(
                 `Dependencies found: ${dependencies
                     .map(({ name, type }) => `${name} (${type})`)
                     .join(", ")}`
+            );
+
+            return Promise.all(
+                dependencies.map(dependency =>
+                    getListOfTags(dependency, logger)
+                        .then(result => Object.assign(dependency, { tags: result }))
+                        .then(dep => findNextVersions(dep, options, logger))
+                        .catch(err => {
+                            logger.childError(err.message || err);
+                            return {
+                                name: dependency.name,
+                                type: dependency.type,
+                                error: "Error caught: " + (err.message || "-unhandled-")
+                            };
+                        }))
             )
-        )
-        .map(dependency =>
-            p
-                .try(() => getListOfTags(dependency, logger))
-                .then(result => Object.assign(dependency, { tags: result }))
-                .then(dep => findNextVersions(dep, options, logger))
-                .catch(err => {
-                    logger.childError(err.message || err);
-                    return {
-                        name: dependency.name,
-                        type: dependency.type,
-                        error: "Error caught: " + (err.message || "-unhandled-")
-                    };
-                })
-        );
+        });
 }
 
 function getDependenciesChecker(rule) {
@@ -74,7 +72,7 @@ function getListOfTags(dependency, logger) {
     const doesItLookLikeGitLink = dependency.version.includes("#semver:");
     const getter = doesItLookLikeGitLink ? gitTags.get : npmTags.get;
 
-    return p.try(() => getter(dependency, logger));
+    return getter(dependency, logger);
 }
 
 function findNextVersions({ name, type, version, tags }, options, logger) {

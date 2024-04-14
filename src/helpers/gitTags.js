@@ -1,20 +1,18 @@
 const minions = require("./minions");
-const p = require("bluebird");
 
 module.exports = {
     get: getGitTags
 };
 
 function getGitTags(dependency, logger) {
-    return p
-        .try(() => getGitUrl(dependency))
-        .tap(gitUrl => logger.debug(`"${dependency.name}" is on ${gitUrl}.`))
-        .then(gitUrl =>
-            minions.spawn(
+    return Promise.resolve(getGitUrl(dependency))
+        .then(gitUrl => {
+            logger.debug(`"${dependency.name}" is on ${gitUrl}.`)
+            return minions.spawn(
                 `git ls-remote --tags --refs --sort="-v:refname" ${gitUrl}`,
                 logger
             )
-        )
+        })
         .then(parseLsRemoteResponse);
 }
 

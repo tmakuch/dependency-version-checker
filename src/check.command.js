@@ -1,7 +1,6 @@
 const logic = require("./logic");
 const selfCheck = require("./cliHelpers/selfCheck");
 const drawTable = require("./cliHelpers/drawCliTable");
-const p = require("bluebird");
 const loggerInit = require("./cliHelpers/logger");
 const commons = require("./commandsCommons");
 
@@ -39,16 +38,14 @@ function handler(yargs) {
                 }/.\n`
             );
 
-            return p.props({
-                spinnerInstance:
-                    logger.spinner &&
-                    logger.spinner.start("Getting dependencies versions."),
-                dependencies: logic.findPackagesToUpdate(
+            return Promise.all([
+                logger.spinner && logger.spinner.start("Getting dependencies versions."),
+                logic.findPackagesToUpdate(
                     yargs.packagePath,
                     yargs.rule,
                     yargs
-                )
-            });
+                )]
+            ).then(([spinnerInstance, dependencies]) => ({ spinnerInstance, dependencies}))
         })
         .then(({ spinnerInstance, dependencies }) => {
             if (spinnerInstance) {

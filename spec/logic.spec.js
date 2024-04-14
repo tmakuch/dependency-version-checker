@@ -15,10 +15,10 @@ describe("logic", () => {
     beforeEach(() => {
         const getter = dep => {
             if (!tags[dep.name]) {
-                throw new Error("nope");
+                return Promise.reject(new Error("nope"));
             }
 
-            return tags[dep.name];
+            return Promise.resolve(tags[dep.name]);
         };
         spyOn(gitTags, "get").and.callFake(getter);
         spyOn(npmTags, "get").and.callFake(getter);

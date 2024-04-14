@@ -12,7 +12,6 @@
   "author": "Tadeusz Makuch",
   "license": "MIT",
   "dependencies": {
-    "bluebird": "^3.5.4",
     "concat-stream": "^2.0.0",
     "ora": "^5.4.1",
     "semver": "^6.3.1",
