@@ -2,7 +2,15 @@
 
 ## 1.0.2 - 2024.04.04
 
-- also check [optional](https://docs.npmjs.com/cli/v9/commands/npm-install) dependencies
+### Added
+
+- also check [optional](https://docs.npmjs.com/cli/v9/commands/npm-install) dependencies by [msimerson](https://github.com/msimerson)
+
+### Changed
+
+- dropped bluebird from dependencies
+- updated semver to 7.6.0
+- prettier for easier dev
 
 ## 1.0.1 - 2019.06.26
 

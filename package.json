@@ -1,6 +1,6 @@
 {
   "name": "dependency-version-checker",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "This library allows you to run a check for newer versions against your development and production dependencies, both npm and `git://`/`git+ssh://`.",
   "main": "src/logic.js",
   "bin": {
