@@ -21,15 +21,20 @@ module.exports = {
         description:
           "Does not update dependencies with major version. Can't be used with --ignore-minor",
       },
+      "ignore-opt": {
+        type: "boolean",
+        description:
+            "Does not update opt dependencies.",
+      },
       "ignore-dev": {
         type: "boolean",
         description:
-          "Does not update dev dependencies. Can't be used with --ignore-prod",
+          "Does not update dev dependencies.",
       },
       "ignore-prod": {
         type: "boolean",
         description:
-          "Does not update prod dependencies. Can't be used with --ignore-dev",
+          "Does not update prod dependencies.",
       },
       "hide-ignored": {
         type: "boolean",
@@ -55,7 +60,7 @@ function handler(yargs) {
   const logger = loggerInit(yargs);
   if (
     (yargs.ignoreMinor && yargs.ignoreMajor) ||
-    (yargs.ignoreProd && yargs.ignoreDev)
+    (yargs.ignoreProd && yargs.ignoreDev && yargs.ignoreOpt)
   ) {
     logger.error(
       "Wait, what do you want from me?\nCheck --help for list of right arguments - you've provided excluding filters.",
@@ -84,6 +89,7 @@ function handler(yargs) {
 
       dependencies.forEach((dependency) => {
         if (
+          (dependency.type === DEP_TYPE.OPT && yargs.ignoreOpt) ||
           (dependency.type === DEP_TYPE.DEV && yargs.ignoreDev) ||
           (dependency.type === DEP_TYPE.PROD && yargs.ignoreProd)
         ) {
