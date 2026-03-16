@@ -1,3 +1,7 @@
+# deprecated
+
+Use `npm outdated` for npm packages. This does not handle git packages, so you can still use this lib, but pull it locally from git and make sure `npm audit` is clean.
+
 # Dependency Version Checker
 
 This library allows you to run a check for newer versions against your development and production dependencies, both npm and `git://`/`git+ssh://`.
