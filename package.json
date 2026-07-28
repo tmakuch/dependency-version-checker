@@ -23,7 +23,7 @@
     "test": "test"
   },
   "devDependencies": {
-    "jasmine": "^3.99.0",
+    "jasmine": "^6.3.0",
     "prettier": "^3.2.5"
   },
   "repository": {
